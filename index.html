@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Generador de Prompts para Historias</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/react@17/umd/react.development.js"></script>
+    <script src="https://unpkg.com/react-dom@17/umd/react-dom.development.js"></script>
+    <script src="https://unpkg.com/babel-standalone@6/babel.min.js"></script>
+</head>
+<body>
+    <div id="root"></div>
+
+    <script type="text/babel">
+        const StoryPromptGenerator = () => {
+            const [characters, setCharacters] = React.useState([{ name: '', description: '' }]);
+            const [genre, setGenre] = React.useState('');
+            const [location, setLocation] = React.useState('');
+            const [readerEducationLevel, setReaderEducationLevel] = React.useState('');
+            const [storyLanguage, setStoryLanguage] = React.useState('');
+            const [readingTime, setReadingTime] = React.useState(5);
+            const [generatedPrompt, setGeneratedPrompt] = React.useState('');
+
+            const addCharacter = () => {
+                setCharacters([...characters, { name: '', description: '' }]);
+            };
+
+            const removeCharacter = (index) => {
+                const newCharacters = characters.filter((_, i) => i !== index);
+                setCharacters(newCharacters);
+            };
+
+            const handleCharacterChange = (index, field, value) => {
+                const newCharacters = [...characters];
+                newCharacters[index][field] = value;
+                setCharacters(newCharacters);
+            };
+
+            const generatePrompt = () => {
+                const characterDescriptions = characters.map(c => `${c.name} (${c.description})`).join(', ');
+                const prompt = `Genera una historia completa de ${genre} que ocurra en ${location}. 
+Los personajes principales son: ${characterDescriptions}. 
+La historia debe ser apropiada para un nivel educativo ${readerEducationLevel} y estar escrita en ${storyLanguage}. 
+La longitud aproximada debe ser de ${readingTime * 100} palabras. 
+La historia debe tener un inicio, desarrollo y un final feliz. 
+No incluyas ningún texto introductorio o de cierre fuera de la historia en sí.
+
+Información adicional sobre los personajes:
+${characters.map(c => `- ${c.name}: ${c.description}`).join('\n')}
+
+Por favor, genera la historia completa basándote en esta información.`;
+
+                setGeneratedPrompt(prompt);
+            };
+
+            return (
+                <div className="max-w-4xl mx-auto p-6 bg-white rounded-lg shadow-lg">
+                    <h1 className="text-3xl font-bold mb-6 text-gray-800">Generador de Prompts para Historias</h1>
+                    
+                    <div className="mb-6">
+                        <h2 className="text-xl font-semibold mb-2 text-gray-700">Personajes</h2>
+                        {characters.map((character, index) => (
+                            <div key={index} className="flex mb-2">
+                                <input
+                                    type="text"
+                                    placeholder="Nombre"
+                                    value={character.name}
+                                    onChange={(e) => handleCharacterChange(index, 'name', e.target.value)}
+                                    className="mr-2 p-2 border rounded"
+                                />
+                                <input
+                                    type="text"
+                                    placeholder="Descripción"
+                                    value={character.description}
+                                    onChange={(e) => handleCharacterChange(index, 'description', e.target.value)}
+                                    className="mr-2 p-2 border rounded flex-grow"
+                                />
+                                <button onClick={() => removeCharacter(index)} className="p-2 text-red-500">
+                                    Eliminar
+                                </button>
+                            </div>
+                        ))}
+                        <button onClick={addCharacter} className="mt-2 p-2 bg-blue-500 text-white rounded">
+                            Añadir Personaje
+                        </button>
+                    </div>
+
+                    <div className="grid grid-cols-2 gap-4 mb-6">
+                        <div>
+                            <label className="block mb-2 font-semibold text-gray-700">Género</label>
+                            <input
+                                type="text"
+                                value={genre}
+                                onChange={(e) => setGenre(e.target.value)}
+                                className="w-full p-2 border rounded"
+                                placeholder="Ej: Aventura, Misterio, Humor"
+                            />
+                        </div>
+                        <div>
+                            <label className="block mb-2 font-semibold text-gray-700">Ubicación</label>
+                            <input
+                                type="text"
+                                value={location}
+                                onChange={(e) => setLocation(e.target.value)}
+                                className="w-full p-2 border rounded"
+                                placeholder="Ej: Bosque Encantado, Estación Espacial"
+                            />
+                        </div>
+                        <div>
+                            <label className="block mb-2 font-semibold text-gray-700">Nivel Educativo del Lector</label>
+                            <select
+                                value={readerEducationLevel}
+                                onChange={(e) => setReaderEducationLevel(e.target.value)}
+                                className="w-full p-2 border rounded"
+                            >
+                                <option value="">Seleccionar Nivel</option>
+                                <option value="preescolar">Preescolar</option>
+                                <option value="primaria">Primaria</option>
+                                <option value="secundaria">Secundaria</option>
+                                <option value="bachillerato">Bachillerato</option>
+                                <option value="universitario">Universitario</option>
+                                <option value="postgrado">Postgrado</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label className="block mb-2 font-semibold text-gray-700">Idioma de la Historia</label>
+                            <select
+                                value={storyLanguage}
+                                onChange={(e) => setStoryLanguage(e.target.value)}
+                                className="w-full p-2 border rounded"
+                            >
+                                <option value="">Seleccionar Idioma</option>
+                                <option value="español">Español</option>
+                                <option value="inglés">Inglés</option>
+                                <option value="francés">Francés</option>
+                                <option value="alemán">Alemán</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div className="mb-6">
+                        <label className="block mb-2 font-semibold text-gray-700">Tiempo de Lectura (minutos)</label>
+                        <input
+                            type="range"
+                            min="1"
+                            max="20"
+                            value={readingTime}
+                            onChange={(e) => setReadingTime(e.target.value)}
+                            className="w-full"
+                        />
+                        <span>{readingTime} minutos (~{readingTime * 100} palabras)</span>
+                    </div>
+
+                    <button
+                        onClick={generatePrompt}
+                        className="w-full p-3 bg-blue-500 text-white rounded hover:bg-blue-600 transition duration-300"
+                    >
+                        Generar Prompt
+                    </button>
+
+                    {generatedPrompt && (
+                        <div className="mt-6">
+                            <h2 className="text-xl font-semibold mb-2 text-gray-700">Prompt Generado</h2>
+                            <textarea
+                                value={generatedPrompt}
+                                readOnly
+                                className="w-full h-64 p-2 border rounded"
+                                style={{ whiteSpace: 'pre-wrap' }}
+                            />
+                            <button
+                                onClick={() => navigator.clipboard.writeText(generatedPrompt)}
+                                className="mt-2 p-2 bg-green-500 text-white rounded hover:bg-green-600 transition duration-300"
+                            >
+                                Copiar Prompt
+                            </button>
+                        </div>
+                    )}
+                </div>
+            );
+        };
+
+        ReactDOM.render(<StoryPromptGenerator />, document.getElementById('root'));
+    </script>
+</body>
+</html>
